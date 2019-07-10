@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>BookList</title>
+</head>
+<body>
+    <div th:include="@{/commons/header} :: pageInfo"/>
+
+    <table border="1">
+        <tr>
+            <th>图书编号</th>
+            <th>图书名称</th>
+            <th>图书简介</th>
+            <th>图书出版社</th>
+            <th>是否在馆</th>
+        </tr>
+    </table>
+
+    <a th:href="@{/getAllUsers}">查看所有用户信息</a>
+
+    <div th:include="@{/commons/footer} :: companyInfo" th:with="projectName=产品"/>
+
+</body>
+</html>
