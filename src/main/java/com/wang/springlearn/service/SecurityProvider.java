@@ -1,6 +1,5 @@
-package com.wang.springlearn.Service;
+package com.wang.springlearn.service;
 
-import com.wang.springlearn.MyUserDetails;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -8,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import com.wang.springlearn.MyUserDetails;
 
 /**
  * 自定义认证服务

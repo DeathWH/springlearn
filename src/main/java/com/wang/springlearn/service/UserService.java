@@ -1,11 +1,10 @@
-package com.wang.springlearn.Service;
+package com.wang.springlearn.service;
 
 import com.wang.springlearn.Entity.User;
 import com.wang.springlearn.Mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

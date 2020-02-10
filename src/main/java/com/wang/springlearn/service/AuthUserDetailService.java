@@ -1,4 +1,4 @@
-package com.wang.springlearn.Service;
+package com.wang.springlearn.service;
 
 import com.wang.springlearn.Entity.User;
 import com.wang.springlearn.Entity.UserRole;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 用户身份认证服务类
