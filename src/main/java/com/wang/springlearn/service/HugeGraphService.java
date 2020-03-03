@@ -7,6 +7,7 @@ import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
+import io.swagger.annotations.Api;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.*;
 @author wanghuai
  */
 @Service
+@Api(value = "",description = "HugeGraph的相关接口信息")
 public class HugeGraphService {
 
     /**
@@ -405,6 +407,72 @@ public class HugeGraphService {
 
         //获取符合条件的边
         ResultSet edgeResultSet = gremlin.gremlin("g.V().hasValue('" + vertex + "').bothE().as('e').otherV().hasLabel('" + type + "').select('e').dedup()").execute();
+
+        HashMap resultHashMap = new HashMap(2);
+        resultHashMap.put("edgeResultSet",edgeResultSet);
+        resultHashMap.put("vertexResultSet",vertexResultSet);
+
+        return resultHashMap;
+    }
+
+    /**
+     * 根据多个关联顶点类型进行筛选
+     * @param label
+     * @param key
+     * @param value
+     * @param typeList
+     * @return
+     */
+    public HashMap searchByVertexConditionList(@Param("顶点标签") String label,@Param("顶点属性") String key,@Param("顶点属性值") String value, @Param("顶点类型") List<String> typeList){
+        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080","hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+        //获取指定类型的顶点
+        String vertexQuery = "g.V().has('" + label + "',"+ "'" + key + "'," + "'" + value + "'" + ").bothE().otherV().hasLabel(";
+        for(String type:typeList){
+            vertexQuery += "'" + type + "',";
+        }
+        vertexQuery += ").dedup()";
+        ResultSet vertexResultSet = gremlin.gremlin(vertexQuery).execute();
+        //获取符合条件的边
+        String edgeQuery = "g.V().has('" + label + "',"+ "'" + key + "'," + "'" + value + "'" + ").bothE().as('e').otherV().hasLabel(";
+        for(String type:typeList){
+            edgeQuery += "'" + type + "',";
+        }
+        edgeQuery += ").select('e').dedup()";
+        ResultSet edgeResultSet = gremlin.gremlin(edgeQuery).execute();
+
+        HashMap resultHashMap = new HashMap(2);
+        resultHashMap.put("edgeResultSet",edgeResultSet);
+        resultHashMap.put("vertexResultSet",vertexResultSet);
+
+        return resultHashMap;
+    }
+
+    /**
+     * 根据多个关联边类型进行筛选
+     * @param label
+     * @param key
+     * @param value
+     * @param typeList
+     * @return
+     */
+    public HashMap searchByEdgeConditionList(@Param("顶点标签") String label,@Param("顶点属性") String key,@Param("顶点属性值") String value, @Param("边类型") List<String> typeList){
+        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080","hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+        //获取指定类型的顶点
+        String vertexQuery = "g.V().has('" + label + "',"+ "'" + key + "'," + "'" + value + "'" + ").bothE().hasLabel(";
+        for(String type:typeList){
+            vertexQuery += "'" + type + "',";
+        }
+        vertexQuery += ").otherV().dedup()";
+        ResultSet vertexResultSet = gremlin.gremlin(vertexQuery).execute();
+        //获取符合条件的边
+        String edgeQuery = "g.V().has('" + label + "',"+ "'" + key + "'," + "'" + value + "'" + ").bothE().hasLabel(";
+        for(String type:typeList){
+            edgeQuery += "'" + type + "',";
+        }
+        edgeQuery += ").dedup()";
+        ResultSet edgeResultSet = gremlin.gremlin(edgeQuery).execute();
 
         HashMap resultHashMap = new HashMap(2);
         resultHashMap.put("edgeResultSet",edgeResultSet);

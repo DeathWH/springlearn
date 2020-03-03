@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.HashMap;
 import java.util.List;
 
-@Controller()
+//@Controller()
 public class UserController {
 
     @Autowired

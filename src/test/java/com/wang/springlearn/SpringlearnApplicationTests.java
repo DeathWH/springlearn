@@ -7,6 +7,10 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class SpringlearnApplicationTests {
@@ -126,6 +130,23 @@ public class SpringlearnApplicationTests {
 //        HashMap hashMap = hugeGraphService.searchByCondition("DarkHotel","域名");
 //        System.out.println("****************************************************");
 //    }
+//        public void searchByVertexConditionList(){
+//        HugeGraphService hugeGraphService = new HugeGraphService();
+//        List<String> typeList = new ArrayList<>();
+//        typeList.add("域名");
+//        typeList.add("MD5");
+//        HashMap hashMap = hugeGraphService.searchByVertexConditionList("IP","ip","82.221.129.16",typeList);
+//        System.out.println("****************************************************");
+//    }
+
+    public void searchByEdgeConditionList(){
+        HugeGraphService hugeGraphService = new HugeGraphService();
+        List<String>typeList = new ArrayList<>();
+        typeList.add("MD5通联IP");
+        typeList.add("解析的IP地址");
+        HashMap hashMap = hugeGraphService.searchByEdgeConditionList("IP","ip","82.221.129.16",typeList);
+        System.out.println("****************************************************");
+    }
 
 //    public void searchOrgByValue(){
 //        HugeGraphService hugeGraphService = new HugeGraphService();
