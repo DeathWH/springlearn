@@ -6,10 +6,13 @@ import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.structure.gremlin.Result;
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
 import io.swagger.annotations.Api;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
+import sun.awt.image.ImageWatched;
+
 import java.util.*;
 
 /**
@@ -70,6 +73,60 @@ public class HugeGraphService {
         return resultHashMap;
     }
 
+    /**
+     * 根据多个输入和关联步数获取多个顶点及关系
+     * @param list
+     * @param steps
+     * @return
+     */
+    public HashMap searchByMultipleAndSteps(@Param("数据列表") List<HashMap> list, @Param("关联步数") int steps){
+        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+
+        //查询所有点的信息
+        String query = "g.V().or(";
+        int size = list.size();
+        List vertexList = new ArrayList();
+        List keyList = new ArrayList();
+        for(int i=0;i<size;i++){
+            String key = (String) list.get(i).keySet().iterator().next();
+            String value = (String) list.get(i).get(key);
+            vertexList.add(value);
+            keyList.add(key);
+            query += "values('" + key + "').is('" + value + "'),";
+        }
+        query += ").repeat(bothE().bothV()).times(" + steps + ").dedup()";
+        ResultSet resultVertexSet = gremlin.gremlin(query).execute();
+        ResultSet resultVertexSet1 = gremlin.gremlin(query + ".group().by(label)").execute();
+
+        //查询所有的边关系
+        ArrayList keySetList = new ArrayList();
+        ArrayList valueSetList = new ArrayList();
+        for(int i = 0;i < resultVertexSet.data().size();i++){
+            LinkedHashMap linkedHashMap = (LinkedHashMap) resultVertexSet.data().get(i);
+            LinkedHashMap linkedHashMap1 = (LinkedHashMap) linkedHashMap.get("properties");
+            String kkk = "";
+            for(Object key:linkedHashMap1.keySet()){
+                kkk = key.toString();
+                keySetList.add(kkk);
+                String value = (String)linkedHashMap1.get(kkk);
+                valueSetList.add(value);
+                break;
+            }
+        }
+        String doubleS = "";
+        for(int j=0;j<resultVertexSet.size();j++){
+            doubleS += "values('" + keySetList.get(j) + "').is('" + valueSetList.get(j) + "'),";
+        }
+        String ss = "g.V().or(";
+        ss += doubleS + ").bothE().as('e').otherV().or(" + doubleS + ").select('e').dedup()";
+        ResultSet resultEdgeSet = gremlin.gremlin(ss).execute();
+
+        HashMap resultHashMap = new HashMap(2);
+        resultHashMap.put("resultVertexSet",resultVertexSet1);
+        resultHashMap.put("resultEdgeSet",resultEdgeSet);
+        return resultHashMap;
+    }
 
     /**
      * 获取所有的图顶点
@@ -137,7 +194,7 @@ public class HugeGraphService {
      */
     public String insertMD5Vertex(@Param("MD5") String md5, @Param("文件大小") int md5Size, @Param("编译时间") String md5Date,
                                @Param("原始文件名") String md5Name, @Param("文件类型") String md5Type, @Param("文件来源") String md5From){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
+        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + md5 + "')").execute();
@@ -442,8 +499,8 @@ public class HugeGraphService {
         ResultSet edgeResultSet = gremlin.gremlin(edgeQuery).execute();
 
         HashMap resultHashMap = new HashMap(2);
-        resultHashMap.put("edgeResultSet",edgeResultSet);
-        resultHashMap.put("vertexResultSet",vertexResultSet);
+        resultHashMap.put("resultEdgeSet",edgeResultSet);
+        resultHashMap.put("resultVertexSet",vertexResultSet);
 
         return resultHashMap;
     }
@@ -475,8 +532,8 @@ public class HugeGraphService {
         ResultSet edgeResultSet = gremlin.gremlin(edgeQuery).execute();
 
         HashMap resultHashMap = new HashMap(2);
-        resultHashMap.put("edgeResultSet",edgeResultSet);
-        resultHashMap.put("vertexResultSet",vertexResultSet);
+        resultHashMap.put("resultEdgeSet",edgeResultSet);
+        resultHashMap.put("resultVertexSet",vertexResultSet);
 
         return resultHashMap;
     }

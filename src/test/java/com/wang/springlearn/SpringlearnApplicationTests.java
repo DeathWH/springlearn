@@ -139,12 +139,27 @@ public class SpringlearnApplicationTests {
 //        System.out.println("****************************************************");
 //    }
 
-    public void searchByEdgeConditionList(){
+//    public void searchByEdgeConditionList(){
+//        HugeGraphService hugeGraphService = new HugeGraphService();
+//        List<String>typeList = new ArrayList<>();
+//        typeList.add("MD5通联IP");
+//        typeList.add("解析的IP地址");
+//        HashMap hashMap = hugeGraphService.searchByEdgeConditionList("IP","ip","82.221.129.16",typeList);
+//        System.out.println("****************************************************");
+//    }
+
+    public void searchByMultipleAndSteps(){
         HugeGraphService hugeGraphService = new HugeGraphService();
-        List<String>typeList = new ArrayList<>();
-        typeList.add("MD5通联IP");
-        typeList.add("解析的IP地址");
-        HashMap hashMap = hugeGraphService.searchByEdgeConditionList("IP","ip","82.221.129.16",typeList);
+        HashMap hashMap1 = new HashMap();
+        HashMap hashMap2 = new HashMap();
+
+        hashMap1.put("硬件ID","hardware001");
+        hashMap2.put("域名","uu.manage-163-account.com");
+
+        List<HashMap> list = new ArrayList<>();
+        list.add(hashMap1);
+        list.add(hashMap2);
+        HashMap hashMap = hugeGraphService.searchByMultipleAndSteps(list,1);
         System.out.println("****************************************************");
     }
 
