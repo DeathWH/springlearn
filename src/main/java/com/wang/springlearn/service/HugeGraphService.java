@@ -104,15 +104,10 @@ public class HugeGraphService {
         ArrayList valueSetList = new ArrayList();
         for(int i = 0;i < resultVertexSet.data().size();i++){
             LinkedHashMap linkedHashMap = (LinkedHashMap) resultVertexSet.data().get(i);
-            LinkedHashMap linkedHashMap1 = (LinkedHashMap) linkedHashMap.get("properties");
-            String kkk = "";
-            for(Object key:linkedHashMap1.keySet()){
-                kkk = key.toString();
-                keySetList.add(kkk);
-                String value = (String)linkedHashMap1.get(kkk);
-                valueSetList.add(value);
-                break;
-            }
+            String vertexKey = (String)linkedHashMap.get("label");
+            String vertexValue = ((String)linkedHashMap.get("id")).substring(2);
+            keySetList.add(vertexKey);
+            valueSetList.add(vertexValue);
         }
         String doubleS = "";
         for(int j=0;j<resultVertexSet.size();j++){
@@ -127,6 +122,80 @@ public class HugeGraphService {
         resultHashMap.put("resultEdgeSet",resultEdgeSet);
         return resultHashMap;
     }
+
+    /**
+     * 根据输入的多个顶点、期望关联的顶点类型和边类型、关联步数，返回过滤的顶点集合和边集合
+     * @param list
+     * @param vertexSetList
+     * @param edgeSetList
+     * @param steps
+     * @return
+     */
+    public HashMap searchByVetexsAndEdgesAndSteps(@Param("顶点数据") List<HashMap> list,
+                                                  @Param("顶点类型") List<String> vertexSetList,
+                                                  @Param("边类型") List<String> edgeSetList,
+                                                  @Param("关联步数") int steps){
+        //如果顶点数据为空或顶点类型为空，则返回空
+        if(list == null || vertexSetList == null){
+            return null;
+        }
+
+        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+
+        //查询关联点的信息
+        String query = "g.V().or(";
+        int size = list.size();
+        List vertexList = new ArrayList();
+        List keyList = new ArrayList();
+        String querySS = "";
+        for(int i=0;i<size;i++){
+            String key = (String) list.get(i).keySet().iterator().next();
+            String value = (String) list.get(i).get(key);
+            vertexList.add(value);
+            keyList.add(key);
+            querySS += "values('" + key + "').is('" + value + "'),";
+        }
+        String queryNew = query + querySS + ").repeat(bothE().bothV()).times(" + steps + ").or(" + querySS + "hasLabel(";
+        for(String str:vertexSetList){
+            queryNew += "'" + str + "',";
+        }
+        ResultSet resultVertexSet1 = gremlin.gremlin(queryNew + ")).dedup().group().by(label)").execute();
+        ResultSet resultVertexSet = gremlin.gremlin(queryNew + ")).dedup()").execute();
+
+        ResultSet resultEdgeSet = null;
+        //如果边关系不为空，则查询关联的边关系
+        if(edgeSetList != null){
+            ArrayList keySetList = new ArrayList();
+            ArrayList valueSetList = new ArrayList();
+            for(int i = 0;i < resultVertexSet.data().size();i++){
+                LinkedHashMap linkedHashMap = (LinkedHashMap) resultVertexSet.data().get(i);
+                String vertexKey = (String)linkedHashMap.get("label");
+                String vertexValue = ((String)linkedHashMap.get("id")).substring(2);
+                keySetList.add(vertexKey);
+                valueSetList.add(vertexValue);
+            }
+
+            String doubleS = "";
+            for(int j=0;j<resultVertexSet.size();j++){
+                doubleS += "values('" + keySetList.get(j) + "').is('" + valueSetList.get(j) + "'),";
+            }
+            String ss = "g.V().or(";
+            ss += doubleS + ").bothE().hasLabel(";
+            for(String str:edgeSetList){
+                ss += "'" + str + "',";
+            }
+            ss += ").as('e').bothV().or(" + doubleS + ").select('e').dedup()";
+            resultEdgeSet = gremlin.gremlin(ss).execute();
+        }
+
+        HashMap resultHashMap = new HashMap(2);
+        resultHashMap.put("resultVertexSet",resultVertexSet1);
+        resultHashMap.put("resultEdgeSet",resultEdgeSet);
+        return resultHashMap;
+    }
+
+
 
     /**
      * 获取所有的图顶点
