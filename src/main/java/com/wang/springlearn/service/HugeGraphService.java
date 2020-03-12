@@ -195,6 +195,28 @@ public class HugeGraphService {
         return resultHashMap;
     }
 
+    /**
+     * 删除顶点
+     * @param key
+     * @param value
+     * @return
+     */
+    public String deleteVertex(@Param("顶点属性")String key,@Param("顶点属性值")String value){
+        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+        String query1 = "g.V().or(values('" + key + "').is('" + value + "')).bothE().as('e').bothV()" +
+                ".or(values('" + key + "').is('" + value + "')).select('e').drop()";
+        String query2 = "g.V().or(values('" + key + "').is('" + value + "')).drop()";
+        ResultSet resultSet1 = gremlin.gremlin(query1).execute();
+        ResultSet resultSet2 = gremlin.gremlin(query2).execute();
+        if(resultSet1.size() != 0){
+            return "删除边失败";
+        }
+        if(resultSet2.size() != 0){
+            return "删除点失败";
+        }
+        return "删除成功";
+    }
 
 
     /**
@@ -253,126 +275,170 @@ public class HugeGraphService {
 
     /**
      * 插入MD5点，并取原属性值和新属性值的并集，对原数据进行覆盖
-     * @param md5(必填)
-     * @param md5Size
-     * @param md5Date
+     * @param MD5
      * @param md5Name
      * @param md5Type
      * @param md5From
+     * @param md5Family
+     * @param md5Process
+     * @param md5Registry
      * @return
      */
-    public String insertMD5Vertex(@Param("MD5") String md5, @Param("文件大小") int md5Size, @Param("编译时间") String md5Date,
-                               @Param("原始文件名") String md5Name, @Param("文件类型") String md5Type, @Param("文件来源") String md5From){
+    public String insertMD5Vertex(@Param("MD5") String MD5, @Param("原始文件名") String md5Name, @Param("文件类型") String md5Type,
+                                  @Param("文件来源") String md5From, @Param("家族信息") String md5Family,
+                                  @Param("进程") String md5Process, @Param("注册表项") String md5Registry){
         HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + md5 + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('MD5','MD5','" + MD5 + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex md5InsertResult = graph.addVertex(T.label, "MD5", "md5", md5, "文件大小", md5Size,
-                    "编译时间",md5Date,"原始文件名", md5Name,"文件类型", md5Type, "文件来源", md5From);
+            try {
+                graph.addVertex(T.label, "MD5", "MD5", MD5,
+                        "原始文件名", md5Name,"文件类型", md5Type, "文件来源", md5From, "家族信息", md5Family,
+                        "进程", md5Process, "注册表项", md5Registry);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
-            //文件大小为int型，需要转换String才能进行判断
-            String ss = md5Size +"";
-            String string = oldOrNew(resultSet.get(0).getVertex().property("文件大小"), ss);
-            Integer integer = new Integer(string);
-            int newMd5Size = integer.intValue();
-            String newMd5Date = oldOrNew(resultSet.get(0).getVertex().property("编译时间"), md5Date);
             String newMd5Name = oldOrNew(resultSet.get(0).getVertex().property("原始文件名"), md5Name);
             String newMd5Type = oldOrNew(resultSet.get(0).getVertex().property("文件类型"), md5Type);
-            String  newMd5From = oldOrNew(resultSet.get(0).getVertex().property("文件来源"), md5From);
+            String newMd5From = oldOrNew(resultSet.get(0).getVertex().property("文件来源"), md5From);
+            String newMd5Family = oldOrNew(resultSet.get(0).getVertex().property("家族信息"), md5Family);
+            String newMd5Process = oldOrNew(resultSet.get(0).getVertex().property("进程"), md5Process);
+            String newMd5Registry = oldOrNew(resultSet.get(0).getVertex().property("注册表项"), md5Registry);
 
-            Vertex md5InsertResult = graph.addVertex(T.label, "MD5", "md5", md5, "文件大小", newMd5Size,
-                    "编译时间",newMd5Date,"原始文件名", newMd5Name,"文件类型", newMd5Type, "文件来源", newMd5From);
+            try{
+                graph.addVertex(T.label, "MD5", "MD5", MD5,"原始文件名", newMd5Name,"文件类型", newMd5Type,
+                        "文件来源", newMd5From, "家族信息", newMd5Family, "进程", newMd5Process, "注册表项", newMd5Registry);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
      * 插入IP点，并取原属性值和新属性值的并集，对原数据进行覆盖
-     * @param ip(必填)
+     * @param IP(必填)
      * @param ipAddress
      * @param ipType
      * @param ipMalicious
      * @return
      */
-    public String insertIPVretex(@Param("IP") String ip, @Param("地理位置") String ipAddress, @Param("设备类型") String ipType,
+    public String insertIPVretex(@Param("IP") String IP, @Param("地理位置") String ipAddress, @Param("设备类型") String ipType,
                                  @Param("恶意节点标识") String ipMalicious){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + ip + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('IP','IP','" + IP + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex ipInsertResult = graph.addVertex(T.label, "IP", "ip", ip, "地理位置", ipAddress,
-                    "设备类型",ipType,"恶意节点标识", ipMalicious);
+            try{
+                graph.addVertex(T.label, "IP", "IP", IP, "地理位置", ipAddress,
+                        "设备类型",ipType,"恶意节点标识", ipMalicious);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
             String newIPAddress = oldOrNew(resultSet.get(0).getVertex().property("地理位置"), ipAddress);
             String newIPType = oldOrNew(resultSet.get(0).getVertex().property("设备类型"), ipType);
             String newIPMalicious = oldOrNew(resultSet.get(0).getVertex().property("恶意节点标识"), ipMalicious);
 
-            Vertex ipInsertResult = graph.addVertex(T.label, "IP", "ip", ip, "地理位置", newIPAddress,
-                    "设备类型",newIPType,"恶意节点标识", newIPMalicious);
+            try{
+                graph.addVertex(T.label, "IP", "IP", IP, "地理位置", newIPAddress,
+                        "设备类型",newIPType,"恶意节点标识", newIPMalicious);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
      * 插入账号点，并取原属性值和新属性值的并集，对原数据进行覆盖
-     * @param account(必填)
-     * @param passwd
+     * @param account
      * @param accountType
      * @param accountBelong
+     * @param accountName
      * @return
      */
-    public String insertAccountVretex(@Param("账号") String account, @Param("账号密码") String passwd, @Param("账号类型") String accountType,
-                                 @Param("账号所属地区") String accountBelong){
+    public String insertAccountVretex(@Param("账号") String account, @Param("账号类型") String accountType,
+                                 @Param("账号注册地") String accountBelong, @Param("昵称") String accountName){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + account + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('账号','账号','" + account + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex accountInsertResult = graph.addVertex(T.label, "账号", "账号", account, "账号密码", passwd,
-                    "账号类型",accountType,"账号所属地区", accountBelong);
+            try{
+                graph.addVertex(T.label, "账号", "账号", account,
+                        "账号类型",accountType,"账号注册地", accountBelong,"昵称",accountName);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
-            String newPasswd = oldOrNew(resultSet.get(0).getVertex().property("账号密码"), passwd);
             String newAccountType = oldOrNew(resultSet.get(0).getVertex().property("账号类型"), accountType);
-            String newAccountBelong = oldOrNew(resultSet.get(0).getVertex().property("账号所属地区"), accountBelong);
+            String newAccountBelong = oldOrNew(resultSet.get(0).getVertex().property("账号注册地"), accountBelong);
+            String newAccountName = oldOrNew(resultSet.get(0).getVertex().property("昵称"), accountName);
 
-            Vertex accountInsertResult = graph.addVertex(T.label, "账号", "账号", account, "账号密码", newPasswd,
-                    "账号类型",newAccountType,"账号所属地区", newAccountBelong);
+            try{
+                graph.addVertex(T.label, "账号", "账号", account,
+                        "账号类型",newAccountType,"账号注册地", newAccountBelong,"昵称",newAccountName);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
      * 插入技术点，并取原属性值和新属性值的并集，对原数据进行覆盖
-     * @param tech(必填)
+     * @param tech
      * @param techType
-     * @param cve
-     * @param authority
+     * @param platform
+     * @param desc
      * @return
      */
-    public String insertTechVretex(@Param("技术") String tech, @Param("技术类型") String techType, @Param("漏洞编号") String cve,
-                                      @Param("需要权限") String authority){
+    public String insertTechVretex(@Param("技术") String tech, @Param("技术类型") String techType, @Param("平台") String platform,
+                                      @Param("描述") String desc){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + tech + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('技术','技术','" + tech + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex techInsertResult = graph.addVertex(T.label, "技术", "技术", tech, "技术类型", techType,
-                    "漏洞编号",cve,"需要权限", authority);
+            try{
+                graph.addVertex(T.label, "技术", "技术", tech, "技术类型", techType,
+                        "平台",platform,"描述", desc);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
             String newTechType = oldOrNew(resultSet.get(0).getVertex().property("技术类型"), techType);
-            String newCVE = oldOrNew(resultSet.get(0).getVertex().property("漏洞编号"), cve);
-            String newAuthority = oldOrNew(resultSet.get(0).getVertex().property("需要权限"), authority);
+            String newPlatForm = oldOrNew(resultSet.get(0).getVertex().property("平台"), platform);
+            String newDesc = oldOrNew(resultSet.get(0).getVertex().property("描述"), desc);
 
-            Vertex techInsertResult = graph.addVertex(T.label, "技术", "技术", tech, "技术类型", newTechType,
-                    "漏洞编号",newCVE, "需要权限", newAuthority);
+            try{
+                graph.addVertex(T.label, "技术", "技术", tech, "技术类型", newTechType,
+                        "平台",newPlatForm, "描述", newDesc);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
@@ -391,11 +457,17 @@ public class HugeGraphService {
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + domain + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('域名','域名','" + domain + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex domainInsertResult = graph.addVertex(T.label, "域名", "域名", domain, "注册地区", domainArea,
+            try{
+                graph.addVertex(T.label, "域名", "域名", domain, "注册地区", domainArea,
                         "状态",domainStatus,"证书（颁发者）", domainCertificate, "域名服务商", domainService, "恶意域名标识", domainMalicious);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
             String newDomainArea = oldOrNew(resultSet.get(0).getVertex().property("注册地区"), domainArea);
             String newDomainStatus = oldOrNew(resultSet.get(0).getVertex().property("状态"), domainStatus);
@@ -403,63 +475,90 @@ public class HugeGraphService {
             String newDomainService = oldOrNew(resultSet.get(0).getVertex().property("域名服务商"), domainService);
             String newDomainMalicious = oldOrNew(resultSet.get(0).getVertex().property("恶意域名标识"), domainMalicious);
 
-            Vertex domainInsertResult = graph.addVertex(T.label, "域名", "域名", domain, "注册地区", newDomainArea,
-                    "状态",newDomainStatus,"证书（颁发者）", newDomainCertificate, "域名服务商", newDomainService, "恶意域名标识", newDomainMalicious);
+            try{
+                graph.addVertex(T.label, "域名", "域名", domain, "注册地区", newDomainArea,
+                        "状态",newDomainStatus,"证书（颁发者）", newDomainCertificate, "域名服务商", newDomainService, "恶意域名标识", newDomainMalicious);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
      * 插入URL点，并取原属性值和新属性值的并集，对原数据进行覆盖
-     * @param url(必填)
+     * @param URL(必填)
      * @param urlMalicious
      * @return
      */
-    public String insertURLVretex(@Param("URL") String url, @Param("恶意URL标识") String urlMalicious){
+    public String insertURLVretex(@Param("URL") String URL, @Param("恶意URL标识") String urlMalicious){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + url + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('URL','URL','" + URL + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex urlInsertResult = graph.addVertex(T.label, "URL", "URL", url, "恶意URL标识", urlMalicious);
+            try{
+                graph.addVertex(T.label, "URL", "URL", URL, "恶意URL标识", urlMalicious);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
             String newURLMalicious = oldOrNew(resultSet.get(0).getVertex().property("状态"), urlMalicious);
 
-            Vertex urlInsertResult = graph.addVertex(T.label, "URL", "URL", url, "恶意URL标识", newURLMalicious);
+            try{
+                graph.addVertex(T.label, "URL", "URL", URL, "恶意URL标识", newURLMalicious);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
      * 插入人员点，并取原属性值和新属性值的并集，对原数据进行覆盖
-     * @param peopleID(必填)
+     * @param peopleID
      * @param peopleName
      * @param peopleCountry
-     * @param peopleType
+     * @param peopleHome
      * @param peopleJob
      * @return
      */
-    public String insertPeopleVretex(@Param("人员ID") String peopleID, @Param("人员姓名") String peopleName, @Param("国籍") String peopleCountry,
-                                     @Param("性质") String peopleType, @Param("工作职位") String peopleJob){
+    public String insertPeopleVretex(@Param("人员") String peopleID, @Param("人员姓名") String peopleName, @Param("国籍") String peopleCountry,
+                                     @Param("居住地") String peopleHome, @Param("职业") String peopleJob){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + peopleID + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('人员','人员','" + peopleID + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex peopleInsertResult = graph.addVertex(T.label, "人员", "人员ID", peopleID, "人员姓名", peopleName,
-                    "国籍", peopleCountry, "性质", peopleType, "工作职位", peopleJob);
+            try{
+                graph.addVertex(T.label, "人员", "人员", peopleID, "人员姓名", peopleName,
+                        "国籍", peopleCountry, "居住地", peopleHome, "职业", peopleJob);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
             String newPeopleName = oldOrNew(resultSet.get(0).getVertex().property("人员姓名"), peopleName);
             String newPeopleCountry= oldOrNew(resultSet.get(0).getVertex().property("国籍"), peopleCountry);
-            String newPeopleType = oldOrNew(resultSet.get(0).getVertex().property("性质"), peopleType);
-            String newPeopleJob = oldOrNew(resultSet.get(0).getVertex().property("工作职位"), peopleJob);
+            String newPeopleHome = oldOrNew(resultSet.get(0).getVertex().property("居住地"), peopleHome);
+            String newPeopleJob = oldOrNew(resultSet.get(0).getVertex().property("职业"), peopleJob);
 
-            Vertex peopleInsertResult = graph.addVertex(T.label, "人员", "人员ID", peopleID, "人员姓名", newPeopleName,
-                    "国籍", newPeopleCountry, "性质", newPeopleType, "工作职位", newPeopleJob);
+            try{
+                graph.addVertex(T.label, "人员", "人员", peopleID, "人员姓名", newPeopleName,
+                        "国籍", newPeopleCountry, "居住地", newPeopleHome, "职业", newPeopleJob);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
     }
 
     /**
@@ -469,33 +568,121 @@ public class HugeGraphService {
      * @param orgCountry
      * @param orgTargetIndustry
      * @param orgTargetPopulation
-     * @param orgPurpose
      * @param orgWithMe
      * @return
      */
     public String insertOrganizationVretex(@Param("组织") String orgName, @Param("组织类别") String orgType, @Param("国家及地区") String orgCountry,
                                            @Param("目标行业") String orgTargetIndustry, @Param("目标人群") String orgTargetPopulation,
-                                           @Param("攻击目的") String orgPurpose, @Param("是否涉我") String orgWithMe){
+                                           @Param("是否涉我") String orgWithMe){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
-        ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + orgName + "')").execute();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('组织','组织','" + orgName + "')").execute();
 
         if(resultSet == null || resultSet.size() == 0){
-            Vertex orgInsertResult = graph.addVertex(T.label, "组织", "组织", orgName, "组织类别", orgType,
-                    "国家及地区", orgCountry, "目标行业", orgTargetIndustry, "目标人群", orgTargetPopulation, "攻击目的", orgPurpose, "是否涉我", orgWithMe);
+            try{
+                graph.addVertex(T.label, "组织", "组织", orgName, "组织类别", orgType,
+                        "国家及地区", orgCountry, "目标行业", orgTargetIndustry, "目标人群", orgTargetPopulation, "是否涉我", orgWithMe);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
         } else {
             String newOrgType = oldOrNew(resultSet.get(0).getVertex().property("组织类别"), orgType);
             String newOrgCountry= oldOrNew(resultSet.get(0).getVertex().property("国家及地区"), orgCountry);
             String newOrgTargetIndustry = oldOrNew(resultSet.get(0).getVertex().property("目标行业"), orgTargetIndustry);
             String newOrgTargetPopulation = oldOrNew(resultSet.get(0).getVertex().property("目标人群"), orgTargetPopulation);
-            String newOrgPurpose = oldOrNew(resultSet.get(0).getVertex().property("攻击目的"), orgPurpose);
             String newOrgWithMe = oldOrNew(resultSet.get(0).getVertex().property("是否涉我"), orgWithMe);
 
-            Vertex orgInsertResult = graph.addVertex(T.label, "组织", "组织", orgName, "组织类别", newOrgType,
-                    "国家及地区", newOrgCountry, "目标行业", newOrgTargetIndustry, "目标人群", newOrgTargetPopulation, "攻击目的", newOrgPurpose, "是否涉我", newOrgWithMe);
+            try{
+                graph.addVertex(T.label, "组织", "组织", orgName, "组织类别", newOrgType,
+                        "国家及地区", newOrgCountry, "目标行业", newOrgTargetIndustry, "目标人群", newOrgTargetPopulation, "是否涉我", newOrgWithMe);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
         }
-        return "OK";
+    }
+
+    /**
+     * 插入硬件点，并取原属性值和新属性值的并集，对原数据进行覆盖
+     * @param hardware
+     * @param hardwareType
+     * @param uuType
+     * @param uuID
+     * @param hardwareMade
+     * @param cve
+     * @return
+     */
+    public String insertHardwareVertex(@Param("硬件") String hardware, @Param("硬件类型") String hardwareType,
+                                       @Param("唯一标识类型") String uuType, @Param("唯一标识") String uuID,
+                                       @Param("制造商") String hardwareMade, @Param("关联漏洞") String cve){
+        HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+        GraphManager graph = hugeClient.graph();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('硬件','硬件','" + hardware + "')").execute();
+
+        if(resultSet == null || resultSet.size() == 0){
+            try{
+                graph.addVertex(T.label, "硬件", "硬件", hardware, "硬件类型", hardwareType,
+                        "唯一标识类型", uuType, "唯一标识", uuID, "制造商", hardwareMade, "关联漏洞", cve);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
+        } else {
+            String newHardwareType= oldOrNew(resultSet.get(0).getVertex().property("硬件类型"), hardwareType);
+            String newUUType= oldOrNew(resultSet.get(0).getVertex().property("唯一标识类型"), uuType);
+            String newUUID = oldOrNew(resultSet.get(0).getVertex().property("唯一标识"), uuID);
+            String newHardwareMade = oldOrNew(resultSet.get(0).getVertex().property("制造商"), hardwareMade);
+            String newCVE = oldOrNew(resultSet.get(0).getVertex().property("关联漏洞"), cve);
+
+            try{
+                graph.addVertex(T.label, "硬件", "硬件", hardware, "硬件类型", newHardwareType,
+                        "唯一标识类型", newUUType, "唯一标识", newUUID, "制造商", newHardwareMade,
+                        "关联漏洞", newCVE);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
+        }
+    }
+
+
+    public String insertSoftwareVertex(@Param("软件") String sotfware, @Param("软件类型") String softwareType,
+                                       @Param("类型子类") String softwareType2, @Param("软件版本") String softwareVersion){
+        HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
+        GremlinManager gremlin = hugeClient.gremlin();
+        GraphManager graph = hugeClient.graph();
+        ResultSet resultSet = gremlin.gremlin("g.V().has('软件','软件','" + sotfware + "')").execute();
+
+        if(resultSet == null || resultSet.size() == 0){
+            try{
+                graph.addVertex(T.label, "软件", "软件", sotfware, "软件类型", softwareType,
+                        "类型子类", softwareType2, "软件版本", softwareVersion);
+            } catch (Exception e){
+                System.out.println(e);
+                return "新增失败";
+            }
+            return "新增成功";
+        } else {
+            String newSoftwareType= oldOrNew(resultSet.get(0).getVertex().property("软件类型"), softwareType);
+            String newSoftwareType2= oldOrNew(resultSet.get(0).getVertex().property("类型子类"), softwareType2);
+            String newSoftwareVersion = oldOrNew(resultSet.get(0).getVertex().property("软件版本"), softwareVersion);
+
+            try{
+                graph.addVertex(T.label, "软件", "软件", sotfware, "软件类型", newSoftwareType,
+                        "类型子类", newSoftwareType2, "软件版本", newSoftwareVersion);
+            } catch (Exception e){
+                System.out.println(e);
+                return "更新失败";
+            }
+            return "更新成功";
+        }
     }
 
     /**

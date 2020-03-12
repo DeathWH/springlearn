@@ -148,22 +148,7 @@ public class SpringlearnApplicationTests {
 //        System.out.println("****************************************************");
 //    }
 
-//    public void searchByMultipleAndSteps(){
-//        HugeGraphService hugeGraphService = new HugeGraphService();
-//        HashMap hashMap1 = new HashMap();
-//        HashMap hashMap2 = new HashMap();
-//
-//        hashMap1.put("硬件","hardware001");
-//        hashMap2.put("域名","uu.manage-163-account.com");
-//
-//        List<HashMap> list = new ArrayList<>();
-//        list.add(hashMap1);
-//        list.add(hashMap2);
-//        HashMap hashMap = hugeGraphService.searchByMultipleAndSteps(list,1);
-//        System.out.println("****************************************************");
-//    }
-
-    public void searchByVetexsAndEdgesAndSteps(){
+    public void searchByMultipleAndSteps(){
         HugeGraphService hugeGraphService = new HugeGraphService();
         HashMap hashMap1 = new HashMap();
         HashMap hashMap2 = new HashMap();
@@ -174,15 +159,35 @@ public class SpringlearnApplicationTests {
         List<HashMap> list = new ArrayList<>();
         list.add(hashMap1);
         list.add(hashMap2);
-
-        List<String> vertexSetList = new ArrayList<>();
-        vertexSetList.add("IP");
-        vertexSetList.add("域名");
-        List<String> edgeSetList = new ArrayList<>();
-        edgeSetList.add("通联IP");
-        HashMap hashMap = hugeGraphService.searchByVetexsAndEdgesAndSteps(list,vertexSetList,edgeSetList,1);
+        HashMap hashMap = hugeGraphService.searchByMultipleAndSteps(list,1);
         System.out.println("****************************************************");
     }
+
+//    public void searchByVetexsAndEdgesAndSteps(){
+//        HugeGraphService hugeGraphService = new HugeGraphService();
+//        HashMap hashMap1 = new HashMap();
+//        HashMap hashMap2 = new HashMap();
+//
+//        hashMap1.put("硬件","hardware001");
+//        hashMap2.put("域名","uu.manage-163-account.com");
+//
+//        List<HashMap> list = new ArrayList<>();
+//        list.add(hashMap1);
+//        list.add(hashMap2);
+//
+//        List<String> vertexSetList = new ArrayList<>();
+//        vertexSetList.add("IP");
+//        vertexSetList.add("域名");
+//        List<String> edgeSetList = new ArrayList<>();
+//        edgeSetList.add("通联IP");
+//        HashMap hashMap = hugeGraphService.searchByVetexsAndEdgesAndSteps(list,vertexSetList,edgeSetList,1);
+//        System.out.println("****************************************************");
+//    }
+//    public void deleteVertex(){
+//        HugeGraphService hugeGraphService = new HugeGraphService();
+//        String kkk = hugeGraphService.deleteVertex("硬件","hardware001");
+//        System.out.println("****************************************************");
+//    }
 
 //    public void searchOrgByValue(){
 //        HugeGraphService hugeGraphService = new HugeGraphService();
