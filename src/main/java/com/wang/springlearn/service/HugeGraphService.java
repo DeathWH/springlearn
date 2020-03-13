@@ -105,7 +105,7 @@ public class HugeGraphService {
         for(int i = 0;i < resultVertexSet.data().size();i++){
             LinkedHashMap linkedHashMap = (LinkedHashMap) resultVertexSet.data().get(i);
             String vertexKey = (String)linkedHashMap.get("label");
-            String vertexValue = ((String)linkedHashMap.get("id")).substring(2);
+            String vertexValue = getPrimaryKey(((String)linkedHashMap.get("id")));
             keySetList.add(vertexKey);
             valueSetList.add(vertexValue);
         }
@@ -123,6 +123,19 @@ public class HugeGraphService {
         return resultHashMap;
     }
 
+    /**
+     * 获取主键，输入格式为1:0123或10:2132，需要判断后截取
+     * @param str
+     * @return
+     */
+    public String getPrimaryKey(String str){
+        if(str.substring(2,3).equals(":")){
+            return str.substring(3);
+        }
+        else {
+            return str.substring(2);
+        }
+    }
     /**
      * 根据输入的多个顶点、期望关联的顶点类型和边类型、关联步数，返回过滤的顶点集合和边集合
      * @param list
@@ -171,7 +184,7 @@ public class HugeGraphService {
             for(int i = 0;i < resultVertexSet.data().size();i++){
                 LinkedHashMap linkedHashMap = (LinkedHashMap) resultVertexSet.data().get(i);
                 String vertexKey = (String)linkedHashMap.get("label");
-                String vertexValue = ((String)linkedHashMap.get("id")).substring(2);
+                String vertexValue = getPrimaryKey(((String)linkedHashMap.get("id")));
                 keySetList.add(vertexKey);
                 valueSetList.add(vertexValue);
             }
@@ -185,7 +198,7 @@ public class HugeGraphService {
             for(String str:edgeSetList){
                 ss += "'" + str + "',";
             }
-            ss += ").as('e').bothV().or(" + doubleS + ").select('e').dedup()";
+            ss += ").as('e').otherV().or(" + doubleS + ").select('e').dedup()";
             resultEdgeSet = gremlin.gremlin(ss).execute();
         }
 
@@ -653,6 +666,14 @@ public class HugeGraphService {
     }
 
 
+    /**
+     * 插入软件点，并取原属性值和新属性值的并集，对原数据进行覆盖
+     * @param sotfware
+     * @param softwareType
+     * @param softwareType2
+     * @param softwareVersion
+     * @return
+     */
     public String insertSoftwareVertex(@Param("软件") String sotfware, @Param("软件类型") String softwareType,
                                        @Param("类型子类") String softwareType2, @Param("软件版本") String softwareVersion){
         HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080","hugegraph");
@@ -701,9 +722,14 @@ public class HugeGraphService {
         ResultSet resultSet2 = gremlin.gremlin("g.V().hasValue('" + vertex2 + "')").execute();
         Vertex vertexb =resultSet2.get(0).getVertex();
 
-        Edge inserEdgeResult = vertexa.addEdge(relation,vertexb);
+        try{
+            vertexa.addEdge(relation,vertexb);
+        } catch (Exception e){
+            System.out.println(e);
+            return "新增失败";
+        }
+        return "新增成功";
 
-        return "OK";
     }
 
     /**
@@ -843,33 +869,6 @@ public class HugeGraphService {
             }
         }
 
-
-//        if(resultSet.size() > 1){
-//            HashMap hashMap = new HashMap();
-//            LinkedHashMap linkedHashMap = (LinkedHashMap) resultSet.data().get(0);
-//            List list1 = (List) linkedHashMap.get("objects");
-//            hashMap.put(0,list1);
-//
-//            int key = 1;
-//            int depth = list1.size();
-//            for(int j=1;j<resultSet.data().size();j++){
-//                LinkedHashMap linkedHashMap1 = (LinkedHashMap) resultSet.data().get(j);
-//                if(((List)linkedHashMap1.get("objects")).size() == depth){
-//                    hashMap.put(key,(List)linkedHashMap1.get("objects"));
-//                    key++;
-//                }else {
-//                    break;
-//                }
-//            }
-//            return hashMap;
-//        } else if(resultSet.size() == 1){
-//            LinkedHashMap linkedHashMap = (LinkedHashMap) resultSet.data().get(0);
-//            HashMap hashMap = new HashMap();
-//            hashMap.put(0,(List) linkedHashMap.get("objects"));
-//            return hashMap;
-//        } else {
-//            return null;
-//        }
 
     }
 
