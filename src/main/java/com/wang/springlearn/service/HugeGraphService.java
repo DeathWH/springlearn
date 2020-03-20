@@ -4,22 +4,33 @@ import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.GremlinManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.structure.constant.T;
-import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.structure.gremlin.Result;
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
+import com.wang.springlearn.Entity.HugeGraphDic;
 import io.swagger.annotations.Api;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import sun.awt.image.ImageWatched;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+import java.lang.Object;
 
 /**
 @author wanghuai
  */
 @Service
 @Api(value = "",description = "HugeGraph的相关接口信息")
+@Component
+@PropertySource(value = "classpath:application.properties")
+
 public class HugeGraphService {
 
     /**
@@ -870,6 +881,26 @@ public class HugeGraphService {
         }
 
 
+    }
+
+    /**
+     * 批量导入第一步，将获取的数据保存为对应的文件
+     * @param str
+     * @param dataType
+     * @throws IOException
+     */
+    public String writeData2File(@Param("字符串") String str,@Param("数据类型")String dataType,@Param("保存的根目录")String filePath) throws IOException {
+        filePath += HugeGraphDic.valueOf(dataType).getDataName();
+        File file = new File(filePath);
+        if(file.exists()){
+            file.delete();
+        }
+        file.createNewFile();
+        FileWriter fileWriter = new FileWriter(file,false);
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        bufferedWriter.write(str);
+        bufferedWriter.close();
+        return "OK";
     }
 
 }

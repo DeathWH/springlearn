@@ -1,13 +1,19 @@
 package com.wang.springlearn;
 
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
+import com.wang.springlearn.Controller.HugeGraphController;
+import com.wang.springlearn.Entity.HugeGraphConfig;
+import com.wang.springlearn.Entity.HugeGraphDic;
 import com.wang.springlearn.service.HugeGraphService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +24,34 @@ public class SpringlearnApplicationTests {
 
     private static final String s = "f74b90e77f38a06ff3f48d6de182a45a";
 
+    @Autowired
+    HugeGraphConfig hugeGraphConfig;
+    @Autowired
+    HugeGraphController hugeGraphController;
+
     @Test
+//    public void ttt(){
+//        edgeKey.valueOf("IP所属人员").getEdgeName();
+//        System.out.println(111);
+//
+//    }
+
+    public void writeFile() throws IOException {
+//        String json = "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
+//                "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
+//                "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}";
+        String txt = "82.221.129.16,冰岛,服务器,恶意节点\n" +
+                "82.221.129.17,冰岛,服务器,恶意节点\n" +
+                "82.221.129.18,冰岛,服务器,恶意节点\n" +
+                "82.221.129.19,冰岛,服务器,恶意节点\n" +
+                "82.221.129.20,冰岛,服务器,恶意节点\n" +
+                "82.221.129.21,冰岛,服务器,恶意节点\n" +
+                "82.221.129.22,冰岛,服务器,恶意节点\n" +
+                "82.221.129.23,冰岛,服务器,恶意节点";
+        hugeGraphController.saveData(txt,HugeGraphDic.IP.name());
+    }
 //    public void  getOneByName(){
+//        String ss = hugeGraphConfig.getUrl();
 //        String string="f74b90e77f38a06ff3f48d6de182a45a";
 //        HugeGraphService hugeGraphService = new HugeGraphService();
 //        ResultSet resultSet = hugeGraphService.getDataByName(string);
@@ -173,26 +205,26 @@ public class SpringlearnApplicationTests {
 //            }
 //    }
 
-    public void searchByVetexsAndEdgesAndSteps(){
-        HugeGraphService hugeGraphService = new HugeGraphService();
-        HashMap hashMap1 = new HashMap();
-        HashMap hashMap2 = new HashMap();
-
-        hashMap1.put("硬件","hardware001");
-        hashMap2.put("域名","uu.manage-163-account.com");
-
-        List<HashMap> list = new ArrayList<>();
-        list.add(hashMap1);
-        list.add(hashMap2);
-
-        List<String> vertexSetList = new ArrayList<>();
-        vertexSetList.add("IP");
-        vertexSetList.add("域名");
-        List<String> edgeSetList = new ArrayList<>();
-        edgeSetList.add("硬件历史所属IP");
-        HashMap hashMap = hugeGraphService.searchByVetexsAndEdgesAndSteps(list,vertexSetList,edgeSetList,2);
-        System.out.println("****************************************************");
-    }
+//    public void searchByVetexsAndEdgesAndSteps(){
+//        HugeGraphService hugeGraphService = new HugeGraphService();
+//        HashMap hashMap1 = new HashMap();
+//        HashMap hashMap2 = new HashMap();
+//
+//        hashMap1.put("硬件","hardware001");
+//        hashMap2.put("域名","uu.manage-163-account.com");
+//
+//        List<HashMap> list = new ArrayList<>();
+//        list.add(hashMap1);
+//        list.add(hashMap2);
+//
+//        List<String> vertexSetList = new ArrayList<>();
+//        vertexSetList.add("IP");
+//        vertexSetList.add("域名");
+//        List<String> edgeSetList = new ArrayList<>();
+//        edgeSetList.add("硬件历史所属IP");
+//        HashMap hashMap = hugeGraphService.searchByVetexsAndEdgesAndSteps(list,vertexSetList,edgeSetList,2);
+//        System.out.println("****************************************************");
+//    }
 //    public void deleteVertex(){
 //        HugeGraphService hugeGraphService = new HugeGraphService();
 //        String kkk = hugeGraphService.deleteVertex("硬件","hardware001");
