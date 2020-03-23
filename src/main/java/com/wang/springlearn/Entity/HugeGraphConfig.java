@@ -29,9 +29,6 @@ public class HugeGraphConfig {
     @Value("${HugeGraphName}")
     private String name;
 
-    public void speack(){
-        System.out.println("username:"+name+"------"+"password:"+url);
-    }
 
 
 }

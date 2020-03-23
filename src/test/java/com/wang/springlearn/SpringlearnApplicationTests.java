@@ -4,7 +4,9 @@ import com.baidu.hugegraph.structure.gremlin.ResultSet;
 import com.wang.springlearn.Controller.HugeGraphController;
 import com.wang.springlearn.Entity.HugeGraphConfig;
 import com.wang.springlearn.Entity.HugeGraphDic;
+import com.wang.springlearn.Entity.SftpAuthority;
 import com.wang.springlearn.service.HugeGraphService;
+import com.wang.springlearn.service.SftpService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
@@ -28,6 +30,8 @@ public class SpringlearnApplicationTests {
     HugeGraphConfig hugeGraphConfig;
     @Autowired
     HugeGraphController hugeGraphController;
+    @Autowired
+    HugeGraphService hugeGraphService;
 
     @Test
 //    public void ttt(){
@@ -36,20 +40,26 @@ public class SpringlearnApplicationTests {
 //
 //    }
 
-    public void writeFile() throws IOException {
-//        String json = "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
-//                "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
-//                "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}";
-        String txt = "82.221.129.16,冰岛,服务器,恶意节点\n" +
-                "82.221.129.17,冰岛,服务器,恶意节点\n" +
-                "82.221.129.18,冰岛,服务器,恶意节点\n" +
-                "82.221.129.19,冰岛,服务器,恶意节点\n" +
-                "82.221.129.20,冰岛,服务器,恶意节点\n" +
-                "82.221.129.21,冰岛,服务器,恶意节点\n" +
-                "82.221.129.22,冰岛,服务器,恶意节点\n" +
-                "82.221.129.23,冰岛,服务器,恶意节点";
-        hugeGraphController.saveData(txt,HugeGraphDic.IP.name());
-    }
+//    public void batchImport() throws IOException {
+////        String json = "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
+////                "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
+////                "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}";
+//        String txt = "82.221.129.16,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.17,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.18,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.19,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.20,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.21,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.22,冰岛,服务器,恶意节点\n" +
+//                "82.221.129.23,冰岛,服务器,恶意节点";
+//        hugeGraphService.batchImport(txt,HugeGraphDic.IP.name());
+//    }
+//    public void uploadFile(){
+//        String src = "E:\\test\\edge_IP所属人员.json";
+//        String dst = fileSavePath +"/edge_IP所属人员.json";
+////        hugeGraphController.uploadFile(src,dst);
+//        hugeGraphController.rmFile(dst);
+//    }
 //    public void  getOneByName(){
 //        String ss = hugeGraphConfig.getUrl();
 //        String string="f74b90e77f38a06ff3f48d6de182a45a";
@@ -101,12 +111,21 @@ public class SpringlearnApplicationTests {
 //        System.out.println("****************************" + s +"************************");
 //    }
 
-//    public void insertIPVertex(){
-//        HugeGraphService hugeGraphService = new HugeGraphService();
-//        String s = hugeGraphService.insertIPVretex("10.10.10.10","中国","","非恶意节点");
-//
-//        System.out.println("****************************" + s +"************************");
-//    }
+    public void insertIPVertex(){
+        HugeGraphService hugeGraphService = new HugeGraphService();
+//        String aa = hugeGraphService.insertIPVretex("10.10.10.10","",null,"非恶意节点");
+//        hugeGraphService.insertMD5Vertex("sss","样本1","","文件来源","md5家族1","进程1","注册表项");
+//        String aa = hugeGraphService.insertAccountVretex("账户1","11","","");
+//        String aa = hugeGraphService.insertTechVretex("技术4",null,"","11");
+//        String aa = hugeGraphService.insertDomainVretex("domain1","111",null,"","","");
+//        String aa = hugeGraphService.insertURLVretex("aaaaaa","111");
+//        String aa = hugeGraphService.insertPeopleVretex("0001","1",null,"","");
+//        String aa = hugeGraphService.insertOrganizationVretex("DDD","111",null,"","","");
+//        String aa = hugeGraphService.insertHardwareVertex("hhh","111",null,"","","");
+//        String aa = hugeGraphService.insertSoftwareVertex("ss",null,"","","");
+        String aa = hugeGraphService.insertEdge("软件","ss","IP","10.10.10.10","软件来源IP");
+        System.out.println("****************************" + aa +"************************");
+    }
 
 //    public void insertAccountVertex(){
 //        HugeGraphService hugeGraphService = new HugeGraphService();

@@ -3,7 +3,11 @@ package com.wang.springlearn.Controller;
 import com.baidu.hugegraph.driver.GremlinManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
+import com.sun.xml.internal.bind.v2.TODO;
+import com.wang.springlearn.Entity.HugeGraphDic;
+import com.wang.springlearn.Entity.SftpAuthority;
 import com.wang.springlearn.service.HugeGraphService;
+import com.wang.springlearn.service.SftpService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.ibatis.annotations.Param;
@@ -24,31 +28,23 @@ public class HugeGraphController {
     @Autowired
     HugeGraphService hugeGraphService;
 
-    @Value("${DataSavePath}")
-    private String path;
-    /**
-     * 根据输入的MD5、账号、IP、域名、URL、组织、人员、技术返回数据集
-     * @param string
-     * @return
-     */
-    @RequestMapping(value = "/getDataByName")
-    @ResponseBody
-    @ApiOperation(value="获取顶点数据",notes="根据输入的MD5、账号、IP、域名、URL、组织、人员、技术返回数据集", httpMethod = "POST")
-    @ApiParam(value = "string",required = true)
-    public ResultSet getDataByName(@Param("string") String string){
-        return hugeGraphService.getDataByName(string);
-    }
+    @Autowired
+    SftpService sftpService;
 
-    /**
-     * 根据多个输入获取多个顶点及关系
-     * @param list
-     * @return
-     */
-    @RequestMapping(value = "/getDataByMultiple")
-    @ApiOperation(value="根据多个输入获取多个顶点及关系",notes="根据多个输入获取多个顶点及关系", httpMethod = "POST")
-    public HashMap getDataByMultiple(@Param("list") List<HashMap> list) {
-        return hugeGraphService.getDataByMultiple(list);
-    }
+    @Value("${DataSavePath}")
+    private String dataSavePath;
+
+    @Value("${ftp.host}")
+    private String host;
+    @Value("${ftp.port}")
+    private int port;
+    @Value("${ftp.user}")
+    private String user;
+    @Value("${ftp.password}")
+    private String password;
+    @Value("${ftp.path}")
+    private String fileSavePath;
+
 
     /**
      * 保存数据到本地
@@ -57,8 +53,58 @@ public class HugeGraphController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "/save")
-    public String saveData(@Param("数据") String str,@Param("数据类型") String dateType) throws IOException {
-        return hugeGraphService.writeData2File(str,dateType,path);
+//    @RequestMapping(value = "/save")
+//    public boolean saveData(@Param("数据") String str,@Param("数据类型") String dateType) throws IOException {
+//        return hugeGraphService.writeData2File(str,dateType,dataSavePath);
+//    }
+
+    /**
+     * 上传文件到远程
+     * @param src
+     * @param dst
+     */
+    public void uploadFile(String src,String dst){
+        SftpAuthority sftpAuthority = new SftpAuthority(user,host,port,password);
+        sftpService.createChannel(sftpAuthority);
+        sftpService.uploadFile(sftpAuthority,"E:\\test\\edge_IP所属人员.json",fileSavePath);
+        sftpService.closeChannel();
     }
+
+    /**
+     * 删除远程文件
+     * @param dst
+     */
+    public void rmFile(String dst){
+        SftpAuthority sftpAuthority = new SftpAuthority(user,host,port,password);
+        sftpService.createChannel(sftpAuthority);
+        sftpService.removeFile(sftpAuthority,dst);
+    }
+
+    /**
+     * 批量导入
+     * @param str
+     * @param dataType
+     * @return
+     * @throws IOException
+     */
+//    public boolean batchImport(@Param("数据") String str,@Param("数据类型") String dataType) throws IOException {
+//        String fileName = HugeGraphDic.valueOf(dataType).getDataName();
+////        将数据写入本地文件
+//        hugeGraphService.writeData2File(str,dataType,dataSavePath);
+////        将文件上传到服务器
+//        SftpAuthority sftpAuthority = new SftpAuthority(user,host,port,password);
+//        sftpService.createChannel(sftpAuthority);
+//        sftpService.uploadFile(sftpAuthority,dataSavePath+fileName, fileSavePath);
+//        sftpService.closeChannel();
+////        TODO 执行批量导入脚本
+////        不需要删除文件，直接用空文件覆盖即可，保留删除代码
+////        sftpService.createChannel(sftpAuthority);
+////        sftpService.removeFile(sftpAuthority,fileSavePath+"/"+fileName);
+//
+////        生成内容为空的文件进行替换
+//        sftpService.createChannel(sftpAuthority);
+//        hugeGraphService.writeData2File("",dataType,dataSavePath);
+//        sftpService.uploadFile(sftpAuthority,dataSavePath+fileName, fileSavePath);
+//        return true;
+//    }
 }
