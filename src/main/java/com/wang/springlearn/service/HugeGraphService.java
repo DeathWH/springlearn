@@ -12,6 +12,7 @@ import com.wang.springlearn.Entity.SftpAuthority;
 import io.swagger.annotations.Api;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,25 @@ import java.lang.Object;
 
 public class HugeGraphService {
 
+    @Value("${HugeGraphURL}")
+    private  String hugeGraphURL;
+    @Value("${HugeGraphName}")
+    private String hugeGraphName;
+    @Value("${DataSavePath}")
+    private String filePath;
+    @Value("{ftp.path}")
+    private String ftpPath;
+    @Value("${ftp.host}")
+    private String host;
+    @Value("${ftp.port}")
+    private int port;
+    @Value("${ftp.user}")
+    private String user;
+    @Value("${ftp.password}")
+    private String password;
+    @Value("${shellPath}")
+    private String shellPath;
+
     @Autowired
     SftpService sftpService;
     /**
@@ -38,7 +58,7 @@ public class HugeGraphService {
      * @return
      */
     public ResultSet getDataByName(@Param("string") String string){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + string + "')").execute();
 
@@ -51,7 +71,7 @@ public class HugeGraphService {
      * @return
      */
     public HashMap getDataByMultiple(@Param("list") List<HashMap> list){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
 
         //查询所有点的信息
@@ -90,7 +110,7 @@ public class HugeGraphService {
      * @return
      */
     public HashMap searchByMultipleAndSteps(@Param("数据列表") List<HashMap> list, @Param("关联步数") int steps){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
 
         //查询所有点的信息
@@ -163,7 +183,7 @@ public class HugeGraphService {
             return null;
         }
 
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
 
         //查询关联点的信息
@@ -225,7 +245,7 @@ public class HugeGraphService {
      * @return
      */
     public String deleteVertex(@Param("顶点属性")String key,@Param("顶点属性值")String value){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         String query1 = "g.V().or(values('" + key + "').is('" + value + "')).bothE().as('e').bothV()" +
                 ".or(values('" + key + "').is('" + value + "')).select('e').drop()";
@@ -247,7 +267,7 @@ public class HugeGraphService {
      * @return
      */
     public ResultSet getAll(){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.168:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         ResultSet resultSet1 = gremlin.gremlin("g.V()").execute();
 
@@ -263,7 +283,7 @@ public class HugeGraphService {
      * @return
      */
     public HashMap getEdgeByName(@Param("string") String string){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         //获取所有的边
         ResultSet resultEdgeSet = gremlin.gremlin("g.V().hasValue('" + string + "').bothE()").execute();
@@ -325,7 +345,7 @@ public class HugeGraphService {
     public String insertMD5Vertex(@Param("MD5") String MD5, @Param("原始文件名") String md5Name, @Param("文件类型") String md5Type,
                                   @Param("文件来源") String md5From, @Param("家族信息") String md5Family,
                                   @Param("进程") String md5Process, @Param("注册表项") String md5Registry){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('MD5','MD5','" + MD5 + "')").execute();
@@ -369,7 +389,7 @@ public class HugeGraphService {
      */
     public String insertIPVretex(@Param("IP") String IP, @Param("地理位置") String ipAddress, @Param("设备类型") String ipType,
                                  @Param("恶意节点标识") String ipMalicious){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('IP','IP','" + IP + "')").execute();
@@ -409,7 +429,7 @@ public class HugeGraphService {
      */
     public String insertAccountVretex(@Param("账号") String account, @Param("账号类型") String accountType,
                                  @Param("账号注册地") String accountBelong, @Param("昵称") String accountName){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('账号','账号','" + account + "')").execute();
@@ -449,7 +469,7 @@ public class HugeGraphService {
      */
     public String insertTechVretex(@Param("技术") String tech, @Param("技术类型") String techType, @Param("平台") String platform,
                                       @Param("描述") String desc){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('技术','技术','" + tech + "')").execute();
@@ -492,7 +512,7 @@ public class HugeGraphService {
     public String insertDomainVretex(@Param("域名") String domain, @Param("注册地区") String domainArea, @Param("状态") String domainStatus,
                                      @Param("证书（颁发者）") String domainCertificate, @Param("域名服务商") String domainService,
                                      @Param("恶意域名标识") String domainMalicious){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('域名','域名','" + domain + "')").execute();
@@ -532,7 +552,7 @@ public class HugeGraphService {
      * @return
      */
     public String insertURLVretex(@Param("URL") String URL, @Param("恶意URL标识") String urlMalicious){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('URL','URL','" + URL + "')").execute();
@@ -547,7 +567,6 @@ public class HugeGraphService {
             return "新增成功";
         } else {
             String newURLMalicious = oldOrNew(resultSet.get(0).getVertex().property("状态"), urlMalicious);
-
             try{
                 graph.addVertex(T.label, "URL", "URL", URL, "恶意URL标识", newURLMalicious);
             } catch (Exception e){
@@ -569,7 +588,7 @@ public class HugeGraphService {
      */
     public String insertPeopleVretex(@Param("人员") String peopleID, @Param("人员姓名") String peopleName, @Param("国籍") String peopleCountry,
                                      @Param("居住地") String peopleHome, @Param("职业") String peopleJob){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('人员','人员','" + peopleID + "')").execute();
@@ -613,7 +632,7 @@ public class HugeGraphService {
     public String insertOrganizationVretex(@Param("组织") String orgName, @Param("组织类别") String orgType, @Param("国家及地区") String orgCountry,
                                            @Param("目标行业") String orgTargetIndustry, @Param("目标人群") String orgTargetPopulation,
                                            @Param("是否涉我") String orgWithMe){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('组织','组织','" + orgName + "')").execute();
@@ -659,7 +678,7 @@ public class HugeGraphService {
     public String insertHardwareVertex(@Param("硬件") String hardware, @Param("硬件类型") String hardwareType,
                                        @Param("唯一标识类型") String uuType, @Param("唯一标识") String uuID,
                                        @Param("制造商") String hardwareMade, @Param("关联漏洞") String cve){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('硬件','硬件','" + hardware + "')").execute();
@@ -705,7 +724,7 @@ public class HugeGraphService {
     public String insertSoftwareVertex(@Param("软件") String sotfware, @Param("软件类型") String softwareType,
                                        @Param("类型子类") String softwareType2, @Param("软件版本") String softwareVersion,
                                        @Param("软件版本") String cve){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         GraphManager graph = hugeClient.graph();
         ResultSet resultSet = gremlin.gremlin("g.V().has('软件','软件','" + sotfware + "')").execute();
@@ -742,8 +761,9 @@ public class HugeGraphService {
      * @param relation
      * @return
      */
-    public String insertEdge(@Param("顶点1类型") String vertex1Type,@Param("顶点1") String vertex1,@Param("顶点2类型") String vertex2Type, @Param("顶点2") String vertex2, @Param("关系") String relation){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+    public String insertEdge(@Param("顶点1类型") String vertex1Type,@Param("顶点1") String vertex1,@Param("顶点2类型") String vertex2Type,
+                             @Param("顶点2") String vertex2, @Param("关系") String relation){
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
 
         ResultSet resultSet1 = gremlin.gremlin("g.V().or(values('" + vertex1Type + "').is('" + vertex1 + "'))").execute();
@@ -768,7 +788,7 @@ public class HugeGraphService {
      * @return
      */
     public HashMap searchByCondition(@Param("顶点") String vertex, @Param("类型") String type){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         //获取指定类型的顶点
         ResultSet vertexResultSet = gremlin.gremlin("g.V().hasValue('" + vertex + "').bothE().otherV().hasLabel('" + type +"').dedup()").execute();
@@ -792,7 +812,7 @@ public class HugeGraphService {
      * @return
      */
     public HashMap searchByVertexConditionList(@Param("顶点标签") String label,@Param("顶点属性") String key,@Param("顶点属性值") String value, @Param("顶点类型") List<String> typeList){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         //获取指定类型的顶点
         String vertexQuery = "g.V().has('" + label + "',"+ "'" + key + "'," + "'" + value + "'" + ").bothE().otherV().hasLabel(";
@@ -825,7 +845,7 @@ public class HugeGraphService {
      * @return
      */
     public HashMap searchByEdgeConditionList(@Param("顶点标签") String label,@Param("顶点属性") String key,@Param("顶点属性值") String value, @Param("边类型") List<String> typeList){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         //获取指定类型的顶点
         String vertexQuery = "g.V().has('" + label + "',"+ "'" + key + "'," + "'" + value + "'" + ").bothE().hasLabel(";
@@ -855,7 +875,7 @@ public class HugeGraphService {
      * @return
      */
     public ResultSet searchOrgByVertex(@Param("顶点属性值") String value){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
         int times = 4;
         ResultSet resultSet = gremlin.gremlin("g.V().hasValue('" + value +  "').repeat(both()).times(" + times + ").hasLabel('组织').dedup()").execute();
@@ -870,7 +890,7 @@ public class HugeGraphService {
      * @return
      */
     public ResultSet searchPathBy2Vertex(@Param("起始顶点属性值") String value1, @Param("组织名称") String value2){
-        HugeClient hugeClient = new HugeClient("http://192.168.10.148:8080", "templates/hugegraph");
+        HugeClient hugeClient = new HugeClient(hugeGraphURL, hugeGraphName);
         GremlinManager gremlin = hugeClient.gremlin();
 
         int times = 4;
@@ -899,14 +919,20 @@ public class HugeGraphService {
         }
     }
 
+    /**
+     * 批量导入
+     * @param str
+     * @param dataType
+     * @return
+     */
     public String batchImport(@Param("字符串") String str, @Param("数据类型")String dataType){
-        String filePath = "\\src\\main\\resources\\templates\\hugegraph\\";
-        String ftpPath = "./hugegraph-loader-0.10.0/example/hugegraph-test";
-        String shellPath = "/home/wang/hugegraph-loader-0.10.0";
-        String user = "wang";
-        String host = "192.168.10.148";
-        int port = 22;
-        String password = "1996wa158187";
+//        String filePath = "\\src\\main\\resources\\templates\\hugegraph\\";
+//        String ftpPath = "./hugegraph-loader-0.10.0/example/hugegraph-test";
+//        String shellPath = "/home/wang/hugegraph-loader-0.10.0";
+//        String user = "wang";
+//        String host = "192.168.10.148";
+//        int port = 22;
+//        String password = "1996wa158187";
 
         String c = System.getProperty("user.dir");
         filePath = c + filePath + HugeGraphDic.valueOf(dataType).getDataName();

@@ -24,6 +24,8 @@ import java.util.List;
 @SpringBootTest
 public class SpringlearnApplicationTests {
 
+    @Value("${HugeGraphURL}")
+    private  String ss;
     private static final String s = "f74b90e77f38a06ff3f48d6de182a45a";
 
     @Autowired
@@ -39,6 +41,10 @@ public class SpringlearnApplicationTests {
 //        System.out.println(111);
 //
 //    }
+    public void deleteVertex(){
+
+        hugeGraphService.deleteVertex("IP","10.10.10.10");
+    }
 
 //    public void batchImport() throws IOException {
 ////        String json = "{\"source_name\": \"82.221.129.16\",\"target_name\": \"000001\"}\n" +
@@ -111,21 +117,21 @@ public class SpringlearnApplicationTests {
 //        System.out.println("****************************" + s +"************************");
 //    }
 
-    public void insertIPVertex(){
-        HugeGraphService hugeGraphService = new HugeGraphService();
-//        String aa = hugeGraphService.insertIPVretex("10.10.10.10","",null,"非恶意节点");
-//        hugeGraphService.insertMD5Vertex("sss","样本1","","文件来源","md5家族1","进程1","注册表项");
-//        String aa = hugeGraphService.insertAccountVretex("账户1","11","","");
-//        String aa = hugeGraphService.insertTechVretex("技术4",null,"","11");
-//        String aa = hugeGraphService.insertDomainVretex("domain1","111",null,"","","");
-//        String aa = hugeGraphService.insertURLVretex("aaaaaa","111");
-//        String aa = hugeGraphService.insertPeopleVretex("0001","1",null,"","");
-//        String aa = hugeGraphService.insertOrganizationVretex("DDD","111",null,"","","");
-//        String aa = hugeGraphService.insertHardwareVertex("hhh","111",null,"","","");
-//        String aa = hugeGraphService.insertSoftwareVertex("ss",null,"","","");
-        String aa = hugeGraphService.insertEdge("软件","ss","IP","10.10.10.10","软件来源IP");
-        System.out.println("****************************" + aa +"************************");
-    }
+//    public void insertIPVertex(){
+//        HugeGraphService hugeGraphService = new HugeGraphService();
+////        String aa = hugeGraphService.insertIPVretex("10.10.10.10","",null,"非恶意节点");
+////        hugeGraphService.insertMD5Vertex("sss","样本1","","文件来源","md5家族1","进程1","注册表项");
+////        String aa = hugeGraphService.insertAccountVretex("账户1","11","","");
+////        String aa = hugeGraphService.insertTechVretex("技术4",null,"","11");
+////        String aa = hugeGraphService.insertDomainVretex("domain1","111",null,"","","");
+////        String aa = hugeGraphService.insertURLVretex("aaaaaa","111");
+////        String aa = hugeGraphService.insertPeopleVretex("0001","1",null,"","");
+////        String aa = hugeGraphService.insertOrganizationVretex("DDD","111",null,"","","");
+////        String aa = hugeGraphService.insertHardwareVertex("hhh","111",null,"","","");
+////        String aa = hugeGraphService.insertSoftwareVertex("ss",null,"","","");
+//        String aa = hugeGraphService.insertEdge("软件","ss","IP","10.10.10.10","软件来源IP");
+//        System.out.println("****************************" + aa +"************************");
+//    }
 
 //    public void insertAccountVertex(){
 //        HugeGraphService hugeGraphService = new HugeGraphService();
